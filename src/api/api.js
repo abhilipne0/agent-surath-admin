@@ -3,7 +3,7 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 
 const api = axios.create({
-  baseURL: 'http://localhost:6969/',
+  baseURL: 'https://agent-surath-backend.onrender.com/',
 });
 
 // Request Interceptor to Attach Token
