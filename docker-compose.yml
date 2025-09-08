@@ -1,8 +1,11 @@
 version: "3.8"
+
 services:
-  app:
+  agent-surath-user:
     build: .
     ports:
-      - "8081:80"
+      - "8080:80"
     restart: always
-    container_name: surath-admin
+    container_name: agent-surath-user
+    env_file:
+      - .env
