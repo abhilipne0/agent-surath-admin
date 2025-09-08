@@ -1,4 +1,4 @@
-name: Build and Deploy Agent Surath User
+name: Build and Deploy Surath Admin
 
 on:
   push:
@@ -13,20 +13,13 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      # Inject .env file from secrets
-      - name: Setup .env file
-        run: |
-          echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" >> .env
-          echo "VITE_OTHER_KEY=${{ secrets.VITE_OTHER_KEY }}" >> .env
-
       - name: Log in to DockerHub
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
       - name: Build and Push Docker Image
         run: |
-          IMAGE_NAME=${{ secrets.DOCKER_USERNAME }}/agent-surath-user:latest
-          docker build -t $IMAGE_NAME .
-          docker push $IMAGE_NAME
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/surath-admin:latest .
+          docker push ${{ secrets.DOCKER_USERNAME }}/surath-admin:latest
 
       - name: Set up SSH
         run: |
@@ -38,19 +31,15 @@ jobs:
       - name: Deploy to VPS
         run: |
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << EOF
-            IMAGE_NAME=${{ secrets.DOCKER_USERNAME }}/agent-surath-user:latest
-
             echo "🔄 Pulling latest Docker image..."
-            docker pull \$IMAGE_NAME
+            docker pull ${{ secrets.DOCKER_USERNAME }}/surath-admin:latest
 
-            echo "🛑 Removing old container..."
-            docker stop agent-surath-user || true
-            docker rm agent-surath-user || true
+            echo "🛑 Stopping old container..."
+            docker stop surath-admin || true
+            docker rm surath-admin || true
 
-            echo "🚀 Running new container with fresh .env..."
-            docker run -d --name agent-surath-user -p 8080:80 --restart always \
-              --env-file /var/www/agent-surath-user/.env \
-              \$IMAGE_NAME
+            echo "🚀 Running new container..."
+            docker run -d --name surath-admin -p 8081:80 --restart always ${{ secrets.DOCKER_USERNAME }}/surath-admin:latest
 
             echo "🔁 Restarting Nginx..."
             sudo systemctl restart nginx
