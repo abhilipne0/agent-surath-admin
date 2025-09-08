@@ -3,7 +3,7 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 
 const api = axios.create({
-  baseURL: 'https://agent-surath-backend.onrender.com/',
+  baseURL: 'https://sorathgaming.fun/api',
 });
 
 // Request Interceptor to Attach Token
